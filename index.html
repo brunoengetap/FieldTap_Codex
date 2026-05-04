@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapParts S1 — Engetap</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f0f4f9;
+  --surf:    #ffffff;
+  --surf2:   #f7fafd;
+  --border:  #dce6f0;
+  --nav:     #0d1b2a;
+  --accent:  #0ea5e9;
+  --accent2: #38bdf8;
+  --ok:      #16a34a;
+  --warn:    #d97706;
+  --danger:  #dc2626;
+  --pend:    #7c3aed;
+  --text:    #0f2235;
+  --text2:   #4a6882;
+  --text3:   #9ab5cc;
+  --head:    'Barlow Condensed', sans-serif;
+  --body:    'Barlow', sans-serif;
+  --r:       10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--body); font-size: 14px; display: flex; height: 100vh; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar { width: 220px; background: var(--nav); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; overflow-x: hidden; }
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); }
+.sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.07); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.logo-badge { background: var(--accent); color: #fff; font-family: var(--head); font-size: 14px; font-weight: 700; padding: 4px 9px; border-radius: 6px; letter-spacing: 1px; }
+.logo-name { font-family: var(--head); font-size: 19px; font-weight: 700; color: #fff; letter-spacing: .5px; }
+.logo-sub { font-size: 9px; color: rgba(255,255,255,.4); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+.nav-section { padding: 16px 10px 6px; font-size: 9px; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: 1.5px; flex-shrink: 0; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-radius: 8px; margin: 0 6px 2px; color: rgba(255,255,255,.6); font-size: 14px; font-weight: 500; transition: background .15s, color .15s; flex-shrink: 0; }
+.nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+.nav-item.active { background: rgba(14,165,233,.2); color: var(--accent2); }
+.nav-item .ni-icon { font-size: 16px; flex-shrink: 0; }
+.nav-item .ni-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+.nav-item .ni-badge.warn { background: var(--warn); }
+.nav-item .ni-badge.ok { background: var(--ok); }
+.sidebar-bottom { margin-top: auto; padding: 14px; border-top: 1px solid rgba(255,255,255,.07); font-size: 11px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── TOPBAR ── */
+.topbar { background: var(--surf); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar-title { font-family: var(--head); font-size: 22px; font-weight: 700; color: var(--text); }
+.topbar-actions { display: flex; gap: 8px; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 8px; cursor: pointer; font-family: var(--body); font-size: 13px; font-weight: 600; padding: 8px 16px; transition: opacity .15s; }
+.btn:hover { opacity: .85; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-ghost { background: var(--surf2); color: var(--text2); border: 1px solid var(--border); }
+.btn-ok { background: #dcfce7; color: var(--ok); border: 1px solid #bbf7d0; }
+.btn-warn { background: #fef3c7; color: var(--warn); border: 1px solid #fde68a; }
+.btn-danger { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+.btn-pend { background: #ede9fe; color: var(--pend); border: 1px solid #ddd6fe; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* ── SCROLL AREA ── */
+.content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.content::-webkit-scrollbar { width: 5px; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── TABLE ── */
+.table-wrap { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 20px; }
+.table-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.table-header h3 { font-family: var(--head); font-size: 16px; font-weight: 600; color: var(--text); }
+.table-header .th-meta { font-size: 12px; color: var(--text2); }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 10px 16px; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; background: var(--surf2); border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surf2); }
+
+/* ── STATUS PILLS ── */
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; white-space: nowrap; letter-spacing: .3px; }
+.pill-atv { background: #dcfce7; color: #166534; }
+.pill-ina { background: #f1f5f9; color: #64748b; }
+.pill-f1 { background: #dbeafe; color: #1e40af; }
+.pill-f2 { background: #fef3c7; color: #92400e; }
+.pill-enc { background: #dcfce7; color: #166534; }
+
+/* ── BADGE ── */
+.badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+.badge-blue { background: #dbeafe; color: #1e40af; }
+.badge-gray { background: #f1f5f9; color: #475569; }
+.badge-ok { background: #dcfce7; color: #166534; }
+.badge-warn { background: #fef3c7; color: #92400e; }
+.badge-pend { background: #ede9fe; color: #5b21b6; }
+
+/* ── FILTER BAR ── */
+.filter-bar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+.search-wrap { position: relative; flex: 1; }
+.search-wrap input { width: 100%; padding: 8px 12px 8px 32px; background: var(--surf); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text); }
+.search-wrap input:focus { outline: none; border-color: var(--accent); }
+.search-wrap::before { content: '🔍'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; pointer-events: none; }
+.filter-select { background: var(--surf); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text); cursor: pointer; }
+
+/* ── CAT GRID ── */
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.cat-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; transition: border-color .15s; }
+.cat-card:hover { border-color: var(--accent); }
+.cat-card .cc-name { font-family: var(--head); font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.cat-card .cc-detail { font-size: 12px; color: var(--text2); margin-bottom: 8px; line-height: 1.5; }
+.cat-card .cc-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.cat-card .cc-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
+.cat-card .cc-id { font-size: 11px; color: var(--text3); font-family: monospace; }
+.cc-actions { display: flex; gap: 5px; }
+.icon-btn { background: transparent; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 13px; color: var(--text2); transition: background .15s; }
+.icon-btn:hover { background: var(--surf2); }
+.add-card { border: 2px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; min-height: 140px; color: var(--text2); transition: border-color .15s, color .15s; border-radius: var(--r); }
+.add-card:hover { border-color: var(--accent); color: var(--accent); }
+.add-card .ac-icon { font-size: 28px; }
+.add-card .ac-label { font-family: var(--head); font-size: 15px; font-weight: 600; }
+
+/* ── KIT CARDS ── */
+.kit-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
+.kit-card .kc-title { font-family: var(--head); font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.kit-card .kc-sub { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+.kit-comp { background: var(--surf2); border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; font-size: 12px; color: var(--text2); }
+.kit-comp strong { color: var(--text); }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,34,53,.55); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surf); border-radius: 14px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; }
+.modal-lg { max-width: 680px; }
+.modal-head { padding: 20px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surf); z-index: 1; }
+.modal-head h3 { font-family: var(--head); font-size: 20px; font-weight: 700; color: var(--text); }
+.modal-close { background: transparent; border: none; font-size: 22px; cursor: pointer; color: var(--text2); line-height: 1; padding: 2px 6px; border-radius: 4px; }
+.modal-close:hover { background: var(--surf2); }
+.modal-body { padding: 18px 22px; }
+.modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; position: sticky; bottom: 0; background: var(--surf); }
+
+/* ── FORM ── */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 5px; }
+.field input, .field select, .field textarea { width: 100%; background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 14px; color: var(--text); font-family: var(--body); }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); background: #fff; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.toggle-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.tog-opt { background: var(--surf2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text2); transition: all .15s; user-select: none; }
+.tog-opt:hover { border-color: var(--accent); }
+.tog-opt.sel { background: #dbeafe; border-color: var(--accent); color: #1e40af; }
+
+/* ── INFO BOXES ── */
+.info-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #0369a1; margin-bottom: 14px; }
+.warn-box { background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #92400e; margin-bottom: 14px; }
+
+/* ── EQUIP TYPE TABS ── */
+.type-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.type-tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid var(--border); background: var(--surf); color: var(--text2); transition: all .15s; }
+.type-tab:hover { border-color: var(--accent); color: var(--accent); }
+.type-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 24px; right: 24px; background: var(--ok); color: #fff; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; opacity: 0; transition: all .3s; pointer-events: none; z-index: 9999; max-width: 320px; }
+#toast.show { opacity: 1; }
+#toast.err { background: var(--danger); }
+
+.section-title { font-family: var(--head); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text2); font-size: 14px; }
+.empty-state .ei { font-size: 40px; margin-bottom: 10px; }
+
+input::placeholder { color: var(--text3); }
+code { font-size: 11px; color: var(--accent); font-family: monospace; }
+
+/* ── GAS LOADING ── */
+.gas-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.gas-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
+.gas-dot.ok { background: var(--ok); }
+.gas-dot.err { background: var(--danger); }
+.gas-dot.spin { background: var(--accent); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ── OS PHASE BADGE ── */
+.phase-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+.phase-1 { background: #dbeafe; color: #1e40af; }
+.phase-2 { background: #fef3c7; color: #92400e; }
+.phase-enc { background: #dcfce7; color: #166534; }
+
+/* ── CATALOG TABS ── */
+.cat-tab-bar { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--border); }
+.cat-tab { padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+.cat-tab:hover { color: var(--text); }
+.cat-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">TAP</div>
+    <div>
+      <div class="logo-name">Parts</div>
+      <div class="logo-sub">Engetap · S1</div>
+    </div>
+  </div>
+
+  <div class="nav-section">Gestão</div>
+  <div class="nav-item active" onclick="setView('clientes',this)" id="nav-clientes">
+    <span class="ni-icon">🏢</span> Clientes
+  </div>
+  <div class="nav-item" onclick="setView('os',this)" id="nav-os">
+    <span class="ni-icon">📋</span> Ordens de Serviço
+  </div>
+  <div class="nav-item" onclick="setView('equipamentos',this)" id="nav-equipamentos">
+    <span class="ni-icon">🔧</span> Equipamentos
+  </div>
+
+  <div class="nav-section">Catálogos</div>
+  <div class="nav-item" onclick="setView('catalogo',this)" id="nav-catalogo">
+    <span class="ni-icon">📦</span> Catálogo de Peças
+  </div>
+  <div class="nav-item" onclick="setView('kits',this)" id="nav-kits">
+    <span class="ni-icon">🧰</span> Kits de Instalação
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="gas-status" id="gasStatus">
+      <div class="gas-dot spin" id="gasDot"></div>
+      <span id="gasLabel">Conectando ao GAS…</span>
+    </div>
+    <div style="margin-top:6px;font-size:10px;opacity:.5">TapParts · Sprint 1</div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topTitle">Clientes</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="syncGAS()">🔄 Sincronizar</button>
+      <button class="btn btn-primary" id="btnTopNew" onclick="topNew()">+ Novo</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ VIEW: CLIENTES ══ -->
+    <div class="view active" id="view-clientes">
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <input type="text" placeholder="Buscar por nome, CNPJ..." oninput="filterTable('tbl-clientes',this.value)">
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Clientes cadastrados</h3>
+          <span class="th-meta" id="cnt-clientes">0 clientes</span>
+        </div>
+        <table>
+          <thead><tr>
+            <th>ID</th><th>Nome</th><th>CNPJ</th><th>Contato</th><th>Endereço</th><th>Status</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="tbl-clientes">
+            <tr><td colspan="7"><div class="empty-state"><div class="ei">🏢</div>Nenhum cliente cadastrado ainda</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: OS ══ -->
+    <div class="view" id="view-os">
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <input type="text" placeholder="Buscar por número OS, cliente..." oninput="filterTable('tbl-os',this.value)">
+        </div>
+        <select class="filter-select" onchange="filterOSStatus(this.value)">
+          <option value="">Todos os status</option>
+          <option value="Fase 1">Fase 1 — Levantamento</option>
+          <option value="Fase 2">Fase 2 — Retorno</option>
+          <option value="Encerrada">Encerrada</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Ordens de Serviço</h3>
+          <span class="th-meta" id="cnt-os">0 OS</span>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Nº OS</th><th>Cliente</th><th>Abertura</th><th>Descrição</th><th>Fase</th><th>Status</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="tbl-os">
+            <tr><td colspan="7"><div class="empty-state"><div class="ei">📋</div>Nenhuma OS cadastrada ainda</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: EQUIPAMENTOS ══ -->
+    <div class="view" id="view-equipamentos">
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <input type="text" placeholder="Buscar por TAG, cliente, tipo..." oninput="filterTable('tbl-equip',this.value)">
+        </div>
+        <select class="filter-select" onchange="filterEquipTipo(this.value)">
+          <option value="">Todos os tipos</option>
+          <option>Vaso de pressão</option>
+          <option>Caldeira</option>
+          <option>Tubulação</option>
+          <option>Tanque</option>
+        </select>
+        <select class="filter-select" id="selEquipCliente" onchange="filterEquipCliente(this.value)">
+          <option value="">Todos os clientes</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Equipamentos</h3>
+          <span class="th-meta" id="cnt-equip">0 equipamentos</span>
+        </div>
+        <table>
+          <thead><tr>
+            <th>TAG</th><th>Cliente</th><th>OS Vinculada</th><th>Tipo</th><th>PMTA</th><th>Localização</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="tbl-equip">
+            <tr><td colspan="7"><div class="empty-state"><div class="ei">🔧</div>Nenhum equipamento cadastrado ainda</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: CATÁLOGO ══ -->
+    <div class="view" id="view-catalogo">
+      <div class="cat-tab-bar" id="catTabBar">
+        <div class="cat-tab active" onclick="setCatTab('manometro',this)">🔵 Manômetros</div>
+        <div class="cat-tab" onclick="setCatTab('valvula',this)">🔴 Válvulas Seg.</div>
+        <div class="cat-tab" onclick="setCatTab('purgador',this)">💧 Purgadores</div>
+        <div class="cat-tab" onclick="setCatTab('dcbi',this)">🔒 DCBIs</div>
+        <div class="cat-tab" onclick="setCatTab('conexao',this)">⚙️ Conexões</div>
+      </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <input type="text" placeholder="Buscar no catálogo..." id="catSearch" oninput="renderCatalogo()">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleInativos()">👁 <span id="lblInativos">Mostrar inativos</span></button>
+      </div>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+
+    <!-- ══ VIEW: KITS ══ -->
+    <div class="view" id="view-kits">
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <input type="text" placeholder="Buscar kit..." oninput="renderKits(this.value)">
+        </div>
+        <select class="filter-select" id="kitTipoFilter" onchange="renderKits()">
+          <option value="">Todos os tipos</option>
+          <option>simples</option>
+          <option>dcbi</option>
+        </select>
+      </div>
+      <div class="cat-grid" id="kitGrid"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ MODAL: NOVO/EDITAR CLIENTE ══ -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-cliente-title">Novo Cliente</h3>
+      <button class="modal-close" onclick="closeModal('modal-cliente')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cli-id">
+      <div class="field">
+        <label>Nome / Razão Social *</label>
+        <input type="text" id="cli-nome" placeholder="Ex: Gerdau — Divinópolis">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>CNPJ</label>
+          <input type="text" id="cli-cnpj" placeholder="00.000.000/0000-00">
+        </div>
+        <div class="field">
+          <label>Contato (nome/telefone)</label>
+          <input type="text" id="cli-contato" placeholder="João Silva · (37) 99999-0000">
+        </div>
+      </div>
+      <div class="field">
+        <label>Endereço</label>
+        <input type="text" id="cli-endereco" placeholder="Rua, número, cidade - UF">
+      </div>
+      <div class="field">
+        <label>Observações</label>
+        <textarea id="cli-obs" rows="2" placeholder="Informações adicionais..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCliente()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: NOVA/EDITAR OS ══ -->
+<div class="modal-overlay" id="modal-os">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-os-title">Nova Ordem de Serviço</h3>
+      <button class="modal-close" onclick="closeModal('modal-os')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="os-id">
+      <div class="field-row">
+        <div class="field">
+          <label>Número da OS *</label>
+          <input type="text" id="os-numero" placeholder="Ex: 2067">
+        </div>
+        <div class="field">
+          <label>Data de Abertura *</label>
+          <input type="date" id="os-data">
+        </div>
+      </div>
+      <div class="field">
+        <label>Cliente *</label>
+        <select id="os-cliente">
+          <option value="">— Selecione um cliente —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Descrição do Serviço</label>
+        <textarea id="os-descricao" rows="3" placeholder="Inspeção NR-13, instalação de manômetros e válvulas de segurança..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-os')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarOS()">💾 Salvar OS</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: NOVO/EDITAR EQUIPAMENTO ══ -->
+<div class="modal-overlay" id="modal-equip">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-equip-title">Novo Equipamento</h3>
+      <button class="modal-close" onclick="closeModal('modal-equip')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="eq-id">
+      <div class="field">
+        <label>Cliente *</label>
+        <select id="eq-cliente" onchange="populateOSByCliente(this.value)">
+          <option value="">— Selecione um cliente —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>OS Vinculada (opcional)</label>
+        <select id="eq-os">
+          <option value="">— Nenhuma / selecione cliente primeiro —</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>TAG do Equipamento *</label>
+          <input type="text" id="eq-tag" placeholder="Ex: VP-01, ACH-303">
+        </div>
+        <div class="field">
+          <label>Tipo *</label>
+          <select id="eq-tipo">
+            <option>Vaso de pressão</option>
+            <option>Caldeira</option>
+            <option>Tubulação</option>
+            <option>Tanque</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>PMTA (kgf/cm²)</label>
+          <input type="number" id="eq-pmta" placeholder="Ex: 10.5" step="0.1">
+        </div>
+        <div class="field">
+          <label>Localização na Planta</label>
+          <input type="text" id="eq-localizacao" placeholder="Ex: Sala de compressores — Linha 2">
+        </div>
+      </div>
+      <div class="field">
+        <label>Campo Livre</label>
+        <input type="text" id="eq-campo" placeholder="Fabricante, número de série, outras informações...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-equip')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEquipamento()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: NOVO ITEM CATÁLOGO ══ -->
+<div class="modal-overlay" id="modal-catalogo">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modal-cat-title">Novo Item no Catálogo</h3>
+      <button class="modal-close" onclick="closeModal('modal-catalogo')">×</button>
+    </div>
+    <div class="modal-body" id="modal-cat-body">
+      <!-- rendered by JS based on catTab -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-catalogo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarItemCatalogo()">💾 Salvar no Catálogo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: NOVO KIT ══ -->
+<div class="modal-overlay" id="modal-kit">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-kit-title">Novo Kit de Instalação</h3>
+      <button class="modal-close" onclick="closeModal('modal-kit')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="kit-id">
+      <div class="field">
+        <label>Nome do Kit *</label>
+        <input type="text" id="kit-nome" placeholder="Ex: Kit Simples 1/4\" NPT">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Bitola *</label>
+          <select id="kit-bitola">
+            <option>1/4" NPT</option>
+            <option>3/8" NPT</option>
+            <option>1/2" NPT</option>
+            <option>3/4" NPT</option>
+            <option>1" NPT</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tipo *</label>
+          <div class="toggle-row" style="margin-top:2px">
+            <div class="tog-opt sel" onclick="togOpt(this,'kit-tipo')">Simples</div>
+            <div class="tog-opt" onclick="togOpt(this,'kit-tipo')">DCBI</div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Componentes (JSON)</label>
+        <textarea id="kit-componentes" rows="4" placeholder='["Niple 1/4\" NPT (x2)", "Joelho 1/4\" 90°", "Bucha redutora 1/2\" x 1/4\""]'></textarea>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Liste os componentes em formato JSON array de strings</div>
+      </div>
+      <div class="field">
+        <label>Inclui reservatório de segurança (RS)?</label>
+        <div class="toggle-row">
+          <div class="tog-opt sel" onclick="togOpt(this,'kit-rs')">Não</div>
+          <div class="tog-opt" onclick="togOpt(this,'kit-rs')">Sim</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-kit')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarKit()">💾 Salvar Kit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: CONFIRMAR EXCLUSÃO ══ -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <h3>Confirmar ação</h3>
+      <button class="modal-close" onclick="closeModal('modal-confirm')">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg" style="font-size:14px;color:var(--text)"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// GAS CONFIG — substitua pela URL real do Web App
+// ═══════════════════════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyIAi-J0DrEBgRj8fIWQShO9ebvunSA0HMnnSzCEbax20db7x9xJ9L204KwzOHZYsw3mA/exec'; // TODO: colar URL do GAS aqui
+
+// ═══════════════════════════════════════════════════════════════
+// ESTADO LOCAL (banco de dados em memória enquanto GAS não está conectado)
+// ═══════════════════════════════════════════════════════════════
+let DB = {
+  clientes: [],
+  os: [],
+  equipamentos: [],
+  catalogo: {
+    manometro: [],
+    valvula: [],
+    purgador: [],
+    dcbi: [],
+    conexao: []
+  },
+  kits: []
+};
+
+// Dados de demonstração
+function initDemoData() {
+  DB.clientes = [
+    { id_cliente:'CLI-001', nome:'Gerdau — Divinópolis', cnpj:'33.611.500/0100-00', contato:'José Alves · (37) 3221-0001', endereco:'Av. Siderurgistas, 100 — Divinópolis MG', obs:'Cliente premium. Contato com 3 dias de antecedência.', ativo:true },
+    { id_cliente:'CLI-002', nome:'Farmax Farmacêutica', cnpj:'42.120.830/0001-21', contato:'Carlos Mota · (37) 3222-5544', endereco:'Rua Industrial, 450 — Divinópolis MG', obs:'Acesso por portaria B.', ativo:true },
+    { id_cliente:'CLI-003', nome:'Stellantis Brasil', cnpj:'30.731.171/0001-52', contato:'Ana Barbosa · (37) 3224-8800', endereco:'Rod. BR-262, Km 660 — Betim MG', obs:'', ativo:true },
+  ];
+  DB.os = [
+    { id_os:'OS-001', id_cliente:'CLI-001', cliente:'Gerdau — Divinópolis', numero_os:'2067', descricao:'Inspeção periódica NR-13 — vasos de pressão linha A', data_abertura:'2026-04-20', status:'Fase 1', fase_atual:1 },
+    { id_os:'OS-002', id_cliente:'CLI-002', cliente:'Farmax Farmacêutica', numero_os:'2110', descricao:'Instalação de manômetros e válvulas de segurança', data_abertura:'2026-04-28', status:'Fase 1', fase_atual:1 },
+    { id_os:'OS-003', id_cliente:'CLI-003', cliente:'Stellantis Brasil', numero_os:'1998', descricao:'Levantamento geral NR-13', data_abertura:'2026-03-10', status:'Encerrada', fase_atual:2 },
+  ];
+  DB.equipamentos = [
+    { id_equipamento:'EQ-001', id_cliente:'CLI-001', id_os:'OS-001', cliente:'Gerdau — Divinópolis', tipo:'Vaso de pressão', tag:'VP-01', localizacao:'Sala de compressores — Linha A', pmta:'10.5', campo_livre:'Compressor de ar — Schulz' },
+    { id_equipamento:'EQ-002', id_cliente:'CLI-001', id_os:'OS-001', cliente:'Gerdau — Divinópolis', tipo:'Vaso de pressão', tag:'VP-02', localizacao:'Sala de compressores — Linha A', pmta:'8.0', campo_livre:'Vaso pulmão' },
+    { id_equipamento:'EQ-003', id_cliente:'CLI-002', id_os:'OS-002', cliente:'Farmax Farmacêutica', tipo:'Caldeira', tag:'CAL-01', localizacao:'Casa de caldeiras', pmta:'6.0', campo_livre:'Caldeira a vapor — Clayton' },
+    { id_equipamento:'EQ-004', id_cliente:'CLI-003', id_os:'OS-003', cliente:'Stellantis Brasil', tipo:'Vaso de pressão', tag:'ACH-301', localizacao:'Linha de pintura — setor 4', pmta:'12.0', campo_livre:'' },
+  ];
+  DB.catalogo = {
+    manometro: [
+      { id:'MAN-001', nome:'Manômetro Glicerinado 63mm', detalhe:'1/4" NPT · Reta · 0–14 kgf/cm²', marca:'Wika', ativo:true, badges:['Glicerinado','63mm','1/4"','0–14 kgf'], calib:false, tipo:'Manômetro' },
+      { id:'MAN-002', nome:'Manômetro Glicerinado 100mm', detalhe:'1/4" NPT · Reta · 0–14 kgf/cm²', marca:'Wika', ativo:true, badges:['Glicerinado','100mm','1/4"','0–14 kgf'], calib:false, tipo:'Manômetro' },
+      { id:'MAN-003', nome:'Manômetro Glicerinado 100mm Angular', detalhe:'1/2" NPT · Angular · 0–21 kgf/cm²', marca:'Genebre', ativo:true, badges:['Glicerinado','100mm','1/2"','0–21 kgf'], calib:false, tipo:'Manômetro' },
+      { id:'MAN-004', nome:'Manômetro Seco 100mm', detalhe:'1/2" NPT · Reta · 0–21 kgf/cm²', marca:'Wika', ativo:true, badges:['Seco','100mm','1/2"','0–21 kgf'], calib:false, tipo:'Manômetro' },
+      { id:'MAN-005', nome:'Vacuômetro Glicerinado 63mm', detalhe:'1/4" NPT · Reta · -1 a 0 kgf/cm²', marca:'Wika', ativo:true, badges:['Vacuômetro','Glicerinado','63mm'], calib:false, tipo:'Vacuômetro' },
+      { id:'MAN-006', nome:'Manômetro Glicerinado 63mm — Alta Pressão', detalhe:'1/4" NPT · Reta · 0–40 kgf/cm²', marca:'Wika', ativo:true, badges:['Glicerinado','63mm','1/4"','0–40 kgf'], calib:true, tipo:'Manômetro' },
+    ],
+    valvula: [
+      { id:'VAL-001', nome:'Válvula de Segurança 1/2" AR', detalhe:'PA=10 kgf · Aço inox · Leser', marca:'Leser', ativo:true, badges:['1/2"','AR','10 kgf','Aço'], calib:true, tipo:'Válvula de segurança' },
+      { id:'VAL-002', nome:'Válvula de Segurança 3/4" AR', detalhe:'PA=8 kgf · Aço inox · Leser', marca:'Leser', ativo:true, badges:['3/4"','AR','8 kgf','Aço'], calib:true, tipo:'Válvula de segurança' },
+    ],
+    purgador: [
+      { id:'PUR-001', nome:'Purgador Termodinâmico 1/2"', detalhe:'PN40 · Aço carbono', marca:'Spirax', ativo:true, badges:['Termodinâmico','1/2"','PN40'], calib:false, tipo:'Purgador' },
+      { id:'PUR-002', nome:'Purgador de Boia 3/4"', detalhe:'PN16 · Corpo fundido', marca:'Spirax', ativo:true, badges:['Boia','3/4"','PN16'], calib:false, tipo:'Purgador' },
+    ],
+    dcbi: [
+      { id:'DCBI-001', nome:'DCBI 1/4" Completo', detalhe:'Válvula tripartida + niples + joelho + lacre', marca:'Engetap', ativo:true, badges:['1/4"','Kit completo'], calib:false, tipo:'DCBI' },
+      { id:'DCBI-002', nome:'DCBI 1/2" Completo', detalhe:'Válvula tripartida + niples + joelho + lacre', marca:'Engetap', ativo:true, badges:['1/2"','Kit completo'], calib:false, tipo:'DCBI' },
+    ],
+    conexao: [
+      { id:'CON-001', nome:'Niple 1/4" NPT', detalhe:'Aço galvanizado · L=50mm', marca:'—', ativo:true, badges:['Niple','1/4"','NPT'], calib:false, tipo:'Niple' },
+      { id:'CON-002', nome:'Joelho 1/4" NPT 90°', detalhe:'Aço galvanizado', marca:'—', ativo:true, badges:['Joelho','1/4"','90°'], calib:false, tipo:'Joelho' },
+      { id:'CON-003', nome:'Bucha Redutora 1/2" x 1/4" NPT', detalhe:'Aço galvanizado', marca:'—', ativo:true, badges:['Bucha','1/2"x1/4"'], calib:false, tipo:'Bucha' },
+    ]
+  };
+  DB.kits = [
+    { id:'KIT-001', nome:'Kit Simples 1/4" NPT', bitola:'1/4" NPT', tipo_kit:'simples', componentes:['Niple 1/4" NPT (x2)','Joelho 1/4" 90°'], inclui_rs:false, ativo:true },
+    { id:'KIT-002', nome:'Kit DCBI 1/4" NPT', bitola:'1/4" NPT', tipo_kit:'dcbi', componentes:['Niple 1/4" NPT (x3)','Joelho 1/4" 90°','Válvula agulha 1/4" (x3)','Bucha 1/2"x1/4"'], inclui_rs:false, ativo:true },
+    { id:'KIT-003', nome:'Kit Simples 1/2" NPT', bitola:'1/2" NPT', tipo_kit:'simples', componentes:['Niple 1/2" NPT (x2)','Joelho 1/2" 90°'], inclui_rs:false, ativo:true },
+    { id:'KIT-004', nome:'Kit DCBI 1/2" NPT', bitola:'1/2" NPT', tipo_kit:'dcbi', componentes:['Niple 1/2" NPT (x3)','Joelho 1/2" 90°','Válvula agulha 1/2" (x3)'], inclui_rs:true, ativo:true },
+  ];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAS API
+// ═══════════════════════════════════════════════════════════════
+async function gasGet(action, params={}) {
+  if (!GAS_URL) throw new Error('GAS não configurado');
+  const url = new URL(GAS_URL);
+  url.searchParams.set('action', action);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v));
+  const r = await fetch(url, { redirect: 'follow' });
+  return r.json();
+}
+
+async function gasPost(action, data={}) {
+  if (!GAS_URL) throw new Error('GAS não configurado');
+  const url = new URL(GAS_URL);
+  url.searchParams.set('action', action);
+  const r = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({ action, ...data }),
+    redirect: 'follow'
+  });
+  return r.json();
+}
+
+async function syncGAS() {
+  if (!GAS_URL) {
+    showToast('⚠ URL do GAS não configurada — operando em modo local', 'warn');
+    return;
+  }
+  setGASStatus('spin', 'Sincronizando…');
+  try {
+    const [clis, oss] = await Promise.all([
+      gasGet('getClientes'),
+      gasGet('getOS'),
+    ]);
+    if (clis.status === 'ok') DB.clientes = clis.clientes;
+    if (oss.status === 'ok')  DB.os = oss.os;
+    setGASStatus('ok', 'GAS conectado ✓');
+    renderAll();
+    showToast('Dados sincronizados com o GAS ✓');
+  } catch(e) {
+    setGASStatus('err', 'Erro de conexão');
+    showToast('Erro ao conectar: ' + e.message, 'err');
+  }
+}
+
+function setGASStatus(state, label) {
+  document.getElementById('gasDot').className = 'gas-dot ' + state;
+  document.getElementById('gasLabel').textContent = label;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLIENTES
+// ═══════════════════════════════════════════════════════════════
+function renderClientes() {
+  const tbody = document.getElementById('tbl-clientes');
+  const q = (document.querySelector('#view-clientes input') || {}).value?.toLowerCase() || '';
+  const data = DB.clientes.filter(c => !q || c.nome?.toLowerCase().includes(q) || c.cnpj?.includes(q));
+  document.getElementById('cnt-clientes').textContent = data.length + ' cliente' + (data.length !== 1 ? 's' : '');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="ei">🏢</div>Nenhum cliente encontrado</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(c => `
+    <tr data-row="${c.id_cliente}">
+      <td><code>${c.id_cliente}</code></td>
+      <td><strong>${c.nome}</strong></td>
+      <td style="color:var(--text2);font-size:12px">${c.cnpj || '—'}</td>
+      <td style="font-size:12px">${c.contato || '—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${c.endereco || '—'}</td>
+      <td><span class="pill ${c.ativo ? 'pill-atv' : 'pill-ina'}">${c.ativo ? '● Ativo' : '○ Inativo'}</span></td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="editarCliente('${c.id_cliente}')">✏️ Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmarExclusao('cliente','${c.id_cliente}','${c.nome}')">🗑</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function abrirModalCliente(id=null) {
+  document.getElementById('modal-cliente-title').textContent = id ? 'Editar Cliente' : 'Novo Cliente';
+  const c = id ? DB.clientes.find(x => x.id_cliente === id) : {};
+  document.getElementById('cli-id').value = id || '';
+  document.getElementById('cli-nome').value = c.nome || '';
+  document.getElementById('cli-cnpj').value = c.cnpj || '';
+  document.getElementById('cli-contato').value = c.contato || '';
+  document.getElementById('cli-endereco').value = c.endereco || '';
+  document.getElementById('cli-obs').value = c.obs || '';
+  openModal('modal-cliente');
+}
+
+function editarCliente(id) { abrirModalCliente(id); }
+
+async function salvarCliente() {
+  const nome = document.getElementById('cli-nome').value.trim();
+  if (!nome) { showToast('Nome é obrigatório', 'err'); return; }
+  const id = document.getElementById('cli-id').value;
+  const obj = {
+    id_cliente: id || 'CLI-' + String(DB.clientes.length + 1).padStart('3','0'),
+    nome, cnpj: document.getElementById('cli-cnpj').value,
+    contato: document.getElementById('cli-contato').value,
+    endereco: document.getElementById('cli-endereco').value,
+    observacoes: document.getElementById('cli-obs').value,
+    ativo: true
+  };
+  if (GAS_URL) {
+    try {
+      const r = await gasPost('salvarCliente', obj);
+      if (r.ok) obj.id_cliente = r.id_cliente || obj.id_cliente;
+    } catch(e) { showToast('Salvo localmente (sem GAS)', 'warn'); }
+  }
+  if (id) {
+    const i = DB.clientes.findIndex(c => c.id_cliente === id);
+    if (i >= 0) DB.clientes[i] = obj;
+  } else {
+    DB.clientes.push(obj);
+  }
+  closeModal('modal-cliente');
+  renderClientes();
+  populateClienteSelects();
+  showToast('Cliente salvo ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OS
+// ═══════════════════════════════════════════════════════════════
+function renderOS() {
+  const tbody = document.getElementById('tbl-os');
+  const q = (document.querySelector('#view-os input') || {}).value?.toLowerCase() || '';
+  let data = DB.os.filter(o => !q || o.numero_os?.includes(q) || o.cliente?.toLowerCase().includes(q) || o.descricao?.toLowerCase().includes(q));
+  document.getElementById('cnt-os').textContent = data.length + ' OS';
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="ei">📋</div>Nenhuma OS encontrada</div></td></tr>';
+    return;
+  }
+  const phaseClass = { 'Fase 1':'phase-1','Fase 2':'phase-2','Encerrada':'phase-enc' };
+  tbody.innerHTML = data.map(o => `
+    <tr>
+      <td><code style="font-size:13px;font-weight:700">${o.numero_os}</code></td>
+      <td><strong>${o.cliente}</strong></td>
+      <td style="font-size:12px;color:var(--text2)">${fmt(o.data_abertura)}</td>
+      <td style="max-width:200px;font-size:12px">${o.descricao || '—'}</td>
+      <td><span class="phase-badge ${phaseClass[o.status] || 'phase-1'}">${o.status}</span></td>
+      <td><span class="pill ${o.status === 'Encerrada' ? 'pill-enc' : 'pill-f1'}">${o.status === 'Encerrada' ? '✓ Concluída' : '🔄 Em andamento'}</span></td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="editarOS('${o.id_os}')">✏️ Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmarExclusao('os','${o.id_os}','OS '+o.numero_os)">🗑</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function abrirModalOS(id=null) {
+  document.getElementById('modal-os-title').textContent = id ? 'Editar OS' : 'Nova Ordem de Serviço';
+  const o = id ? DB.os.find(x => x.id_os === id) : {};
+  document.getElementById('os-id').value = id || '';
+  document.getElementById('os-numero').value = o.numero_os || '';
+  document.getElementById('os-data').value = o.data_abertura || new Date().toISOString().split('T')[0];
+  document.getElementById('os-descricao').value = o.descricao || '';
+  const sel = document.getElementById('os-cliente');
+  sel.innerHTML = '<option value="">— Selecione um cliente —</option>' +
+    DB.clientes.filter(c=>c.ativo).map(c=>`<option value="${c.id_cliente}" ${c.id_cliente===o.id_cliente?'selected':''}>${c.nome}</option>`).join('');
+  openModal('modal-os');
+}
+
+function editarOS(id) { abrirModalOS(id); }
+
+async function salvarOS() {
+  const num = document.getElementById('os-numero').value.trim();
+  const cliId = document.getElementById('os-cliente').value;
+  if (!num || !cliId) { showToast('Nº OS e cliente são obrigatórios', 'err'); return; }
+  const cli = DB.clientes.find(c => c.id_cliente === cliId);
+  const id = document.getElementById('os-id').value;
+  const obj = {
+    id_os: id || 'OS-' + String(DB.os.length + 1).padStart('3','0'),
+    id_cliente: cliId, cliente: cli.nome,
+    numero_os: num, descricao: document.getElementById('os-descricao').value,
+    data_abertura: document.getElementById('os-data').value,
+    status: 'Fase 1', fase_atual: 1
+  };
+  if (GAS_URL) {
+    try { await gasPost('salvarOS', obj); } catch(e) {}
+  }
+  if (id) { const i = DB.os.findIndex(x => x.id_os === id); if (i>=0) DB.os[i] = obj; }
+  else DB.os.push(obj);
+  closeModal('modal-os');
+  renderOS();
+  showToast('OS salva ✓');
+}
+
+function filterOSStatus(v) {
+  const rows = document.querySelectorAll('#tbl-os tr');
+  rows.forEach(r => {
+    if (!v) { r.style.display = ''; return; }
+    const txt = r.textContent;
+    r.style.display = txt.includes(v) ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EQUIPAMENTOS
+// ═══════════════════════════════════════════════════════════════
+function renderEquipamentos() {
+  const tbody = document.getElementById('tbl-equip');
+  const q = (document.querySelector('#view-equipamentos input') || {}).value?.toLowerCase() || '';
+  const data = DB.equipamentos.filter(e => !q || e.tag?.toLowerCase().includes(q) || e.cliente?.toLowerCase().includes(q) || e.tipo?.toLowerCase().includes(q));
+  document.getElementById('cnt-equip').textContent = data.length + ' equipamento' + (data.length !== 1 ? 's' : '');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="ei">🔧</div>Nenhum equipamento encontrado</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(e => `
+    <tr>
+      <td><strong style="font-family:var(--head);font-size:16px">${e.tag}</strong></td>
+      <td>${e.cliente}</td>
+      <td><code style="font-size:11px">${e.id_os || '—'}</code></td>
+      <td><span class="badge badge-blue">${e.tipo}</span></td>
+      <td style="font-size:12px">${e.pmta ? e.pmta + ' kgf/cm²' : '—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${e.localizacao || '—'}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="editarEquip('${e.id_equipamento}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmarExclusao('equip','${e.id_equipamento}','${e.tag}')">🗑</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function populateOSByCliente(cliId) {
+  const sel = document.getElementById('eq-os');
+  const opts = DB.os.filter(o => !cliId || o.id_cliente === cliId);
+  sel.innerHTML = '<option value="">— Nenhuma —</option>' + opts.map(o => `<option value="${o.id_os}">OS ${o.numero_os}</option>`).join('');
+}
+
+function abrirModalEquip(id=null) {
+  document.getElementById('modal-equip-title').textContent = id ? 'Editar Equipamento' : 'Novo Equipamento';
+  const e = id ? DB.equipamentos.find(x => x.id_equipamento === id) : {};
+  document.getElementById('eq-id').value = id || '';
+  document.getElementById('eq-tag').value = e.tag || '';
+  document.getElementById('eq-pmta').value = e.pmta || '';
+  document.getElementById('eq-localizacao').value = e.localizacao || '';
+  document.getElementById('eq-campo').value = e.campo_livre || '';
+  const tipos = ['Vaso de pressão','Caldeira','Tubulação','Tanque'];
+  document.getElementById('eq-tipo').value = e.tipo || 'Vaso de pressão';
+  const cliSel = document.getElementById('eq-cliente');
+  cliSel.innerHTML = '<option value="">— Selecione —</option>' + DB.clientes.filter(c=>c.ativo).map(c=>`<option value="${c.id_cliente}" ${c.id_cliente===e.id_cliente?'selected':''}>${c.nome}</option>`).join('');
+  populateOSByCliente(e.id_cliente || '');
+  if (e.id_os) document.getElementById('eq-os').value = e.id_os;
+  openModal('modal-equip');
+}
+
+function editarEquip(id) { abrirModalEquip(id); }
+
+async function salvarEquipamento() {
+  const tag = document.getElementById('eq-tag').value.trim();
+  const cliId = document.getElementById('eq-cliente').value;
+  if (!tag || !cliId) { showToast('TAG e cliente são obrigatórios', 'err'); return; }
+  const cli = DB.clientes.find(c => c.id_cliente === cliId);
+  const osId = document.getElementById('eq-os').value;
+  const id = document.getElementById('eq-id').value;
+  const obj = {
+    id_equipamento: id || 'EQ-' + String(DB.equipamentos.length + 1).padStart('3','0'),
+    id_cliente: cliId, cliente: cli.nome, id_os: osId,
+    tipo: document.getElementById('eq-tipo').value,
+    tag, localizacao: document.getElementById('eq-localizacao').value,
+    pmta: document.getElementById('eq-pmta').value,
+    campo_livre: document.getElementById('eq-campo').value,
+    cadastrado_por: 'adm'
+  };
+  if (GAS_URL) {
+    try { await gasPost('salvarEquipamento', obj); } catch(e) {}
+  }
+  if (id) { const i = DB.equipamentos.findIndex(x => x.id_equipamento === id); if (i>=0) DB.equipamentos[i] = obj; }
+  else DB.equipamentos.push(obj);
+  closeModal('modal-equip');
+  renderEquipamentos();
+  showToast('Equipamento salvo ✓');
+}
+
+function filterEquipTipo(v) {
+  DB.equipamentos._tipoFilter = v;
+  renderEquipamentos();
+}
+function filterEquipCliente(v) {
+  DB.equipamentos._cliFilter = v;
+  renderEquipamentos();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CATÁLOGO
+// ═══════════════════════════════════════════════════════════════
+let currentCatTab = 'manometro';
+let showInativos = false;
+
+function setCatTab(tab, el) {
+  currentCatTab = tab;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('catSearch').value = '';
+  renderCatalogo();
+  // Update topbar btn
+  const labels = { manometro:'Manômetro', valvula:'Válvula Seg.', purgador:'Purgador', dcbi:'DCBI', conexao:'Conexão' };
+  document.getElementById('btnTopNew').textContent = '+ Novo ' + labels[tab];
+}
+
+function toggleInativos() {
+  showInativos = !showInativos;
+  document.getElementById('lblInativos').textContent = showInativos ? 'Ocultar inativos' : 'Mostrar inativos';
+  renderCatalogo();
+}
+
+function renderCatalogo() {
+  const grid = document.getElementById('catGrid');
+  const q = document.getElementById('catSearch')?.value?.toLowerCase() || '';
+  let data = (DB.catalogo[currentCatTab] || []).filter(m => {
+    if (!showInativos && !m.ativo) return false;
+    return !q || m.nome?.toLowerCase().includes(q) || m.detalhe?.toLowerCase().includes(q) || m.marca?.toLowerCase().includes(q);
+  });
+  const catIcone = { manometro:'🔵', valvula:'🔴', purgador:'💧', dcbi:'🔒', conexao:'⚙️' };
+  grid.innerHTML = data.map(m => `
+    <div class="cat-card" style="${!m.ativo?'opacity:.55':''}">
+      <div class="cc-name">${m.nome}</div>
+      <div class="cc-detail">${m.detalhe} · <strong>${m.marca || '—'}</strong></div>
+      <div class="cc-badges">
+        ${(m.badges||[]).map(b=>`<span class="badge badge-blue">${b}</span>`).join('')}
+        ${m.calib ? '<span class="badge badge-warn">Calibração NR-13</span>' : '<span class="badge badge-ok">Sem calibração</span>'}
+        <span class="badge ${m.ativo ? 'badge-ok' : 'badge-gray'}">${m.ativo ? '● Ativo' : '○ Inativo'}</span>
+      </div>
+      <div class="cc-footer">
+        <span class="cc-id">${m.id}</span>
+        <div class="cc-actions">
+          <button class="icon-btn" title="Editar" onclick="editarItemCatalogo('${m.id}')">✏️</button>
+          <button class="icon-btn" title="${m.ativo?'Inativar':'Ativar'}" onclick="toggleAtivoCatalogo('${m.id}')">${m.ativo?'🚫':'✅'}</button>
+        </div>
+      </div>
+    </div>`).join('') + `
+    <div class="add-card" onclick="abrirModalCatalogo()">
+      <div class="ac-icon">${catIcone[currentCatTab] || '+'}</div>
+      <div class="ac-label">Novo ${currentCatTab}</div>
+    </div>`;
+}
+
+function toggleAtivoCatalogo(id) {
+  const arr = DB.catalogo[currentCatTab];
+  const item = arr.find(x => x.id === id);
+  if (!item) return;
+  item.ativo = !item.ativo;
+  if (GAS_URL) gasPost('toggleAtivoItem', { id, tipo: currentCatTab }).catch(()=>{});
+  renderCatalogo();
+  showToast(`Item ${item.ativo ? 'ativado' : 'inativado'} ✓`);
+}
+
+function editarItemCatalogo(id) {
+  const item = (DB.catalogo[currentCatTab] || []).find(x => x.id === id);
+  if (!item) return;
+  abrirModalCatalogo(item);
+}
+
+// Form bodies por tipo
+const catForms = {
+  manometro: (item={}) => `
+    <div class="field">
+      <label>Subtipo</label>
+      <div class="toggle-row">
+        ${['Manômetro','Vacuômetro','Manovacuômetro'].map(s=>`<div class="tog-opt ${(item.tipo||'Manômetro')===s?'sel':''}" onclick="togOpt(this,'cat-subtipo')">${s}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Fluido</label>
+        <div class="toggle-row">
+          ${['Glicerinado','Seco'].map(s=>`<div class="tog-opt ${(item.badges||[]).includes(s)?'sel':''}" onclick="togOpt(this,'cat-fluido')">${s}</div>`).join('')}
+        </div>
+      </div>
+      <div class="field"><label>Rosca de entrada</label>
+        <div class="toggle-row">
+          ${['1/4" NPT','1/2" NPT'].map(s=>`<div class="tog-opt ${(item.badges||[]).includes(s)?'sel':''}" onclick="togOpt(this,'cat-rosca')">${s}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Tipo de entrada</label>
+        <div class="toggle-row">
+          <div class="tog-opt ${!(item.badges||[]).includes('Angular')?'sel':''}" onclick="togOpt(this,'cat-entrada')">Reta</div>
+          <div class="tog-opt ${(item.badges||[]).includes('Angular')?'sel':''}" onclick="togOpt(this,'cat-entrada')">Angular</div>
+        </div>
+      </div>
+      <div class="field"><label>Caixa (mm)</label>
+        <select id="cat-caixa">
+          ${['50','63','100','150','200'].map(s=>`<option ${item.nome?.includes(s+'mm')?'selected':''}>${s} mm</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Escala padrão</label>
+      <select id="cat-escala">
+        ${['0 a 4 kgf/cm²','0 a 6 kgf/cm²','0 a 10 kgf/cm²','0 a 14 kgf/cm²','0 a 21 kgf/cm²','0 a 28 kgf/cm²','0 a 40 kgf/cm²','-1 a 0 kgf/cm² (Vacuômetro)','-1 a 1 kgf/cm² (Manovacuômetro)','Personalizada'].map(s=>`<option>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Marca</label>
+        <select id="cat-marca"><option ${item.marca==='Wika'?'selected':''}>Wika</option><option ${item.marca==='Genebre'?'selected':''}>Genebre</option><option ${item.marca==='Pressure'?'selected':''}>Pressure</option><option>Outra</option></select>
+      </div>
+      <div class="field"><label>Modelo (opcional)</label>
+        <input type="text" id="cat-modelo" placeholder="Ex: 212.20" value="${item.modelo||''}">
+      </div>
+    </div>
+    <div class="field">
+      <label>Requer calibração NR-13?</label>
+      <div class="toggle-row">
+        <div class="tog-opt ${!item.calib?'sel':''}" onclick="togOpt(this,'cat-calib')">Não</div>
+        <div class="tog-opt ${item.calib?'sel':''}" onclick="togOpt(this,'cat-calib')">Sim</div>
+      </div>
+    </div>`,
+
+  valvula: (item={}) => `
+    <div class="field-row">
+      <div class="field"><label>Bitola de entrada</label>
+        <select id="cat-bit-ent">${['1/4"','3/8"','1/2"','3/4"','1"'].map(s=>`<option>${s}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Bitola de saída</label>
+        <select id="cat-bit-sai">${['1/4"','3/8"','1/2"','3/4"','1"'].map(s=>`<option>${s}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Fluido</label>
+        <div class="toggle-row">
+          <div class="tog-opt sel" onclick="togOpt(this,'cat-fluido-v')">AR</div>
+          <div class="tog-opt" onclick="togOpt(this,'cat-fluido-v')">Vapor</div>
+          <div class="tog-opt" onclick="togOpt(this,'cat-fluido-v')">Gás</div>
+          <div class="tog-opt" onclick="togOpt(this,'cat-fluido-v')">Líquido</div>
+        </div>
+      </div>
+      <div class="field"><label>Pressão de abertura (PA) — kgf/cm²</label>
+        <input type="number" id="cat-pa" step="0.5" placeholder="Ex: 10.0" value="${item.pa||''}">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Material</label>
+        <div class="toggle-row">
+          <div class="tog-opt sel" onclick="togOpt(this,'cat-mat')">Aço inox</div>
+          <div class="tog-opt" onclick="togOpt(this,'cat-mat')">Aço carbono</div>
+          <div class="tog-opt" onclick="togOpt(this,'cat-mat')">Bronze</div>
+        </div>
+      </div>
+      <div class="field"><label>Marca</label>
+        <select id="cat-marca-v"><option>Leser</option><option>Swagelok</option><option>Herose</option><option>Outra</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Modelo (opcional)</label>
+      <input type="text" id="cat-modelo-v" placeholder="Ex: 459.0" value="${item.modelo||''}">
+    </div>`,
+
+  purgador: (item={}) => `
+    <div class="field"><label>Tipo de purgador</label>
+      <div class="toggle-row">
+        <div class="tog-opt sel" onclick="togOpt(this,'cat-tip-pur')">Termodinâmico</div>
+        <div class="tog-opt" onclick="togOpt(this,'cat-tip-pur')">Boia</div>
+        <div class="tog-opt" onclick="togOpt(this,'cat-tip-pur')">Termostático</div>
+        <div class="tog-opt" onclick="togOpt(this,'cat-tip-pur')">Disco</div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Bitola</label>
+        <select id="cat-bit-pur">${['1/2"','3/4"','1"','1.1/2"'].map(s=>`<option>${s}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>PN (pressão nominal)</label>
+        <select id="cat-pn-pur"><option>PN16</option><option>PN25</option><option>PN40</option><option>PN63</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Fluido</label>
+      <input type="text" id="cat-flu-pur" placeholder="Ex: Vapor saturado" value="${item.fluido||''}">
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Marca</label>
+        <select id="cat-marca-pur"><option>Spirax</option><option>Armstrong</option><option>TLV</option><option>Outra</option></select>
+      </div>
+      <div class="field"><label>Modelo</label>
+        <input type="text" id="cat-mod-pur" placeholder="Modelo" value="${item.modelo||''}">
+      </div>
+    </div>`,
+
+  dcbi: (item={}) => `
+    <div class="info-box">ℹ️ DCBI = Dispositivo Contra Bloqueio Inadvertido. Composto por válvula tripartida + niples + joelho + lacre de segurança.</div>
+    <div class="field"><label>Bitola de conexão *</label>
+      <div class="toggle-row">
+        ${['1/4" NPT','3/8" NPT','1/2" NPT','3/4" NPT'].map(s=>`<div class="tog-opt ${(item.badges||[]).includes(s.replace(' NPT',''))?'sel':''}" onclick="togOpt(this,'cat-bit-dcbi')">${s}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field"><label>Componentes (JSON)</label>
+      <textarea id="cat-comp-dcbi" rows="4" placeholder='["Válvula agulha 1/4" (x3)", "Niple 1/4" (x2)", "Joelho 90°", "Lacre de segurança"]'>${item.componentes_json||''}</textarea>
+    </div>`,
+
+  conexao: (item={}) => `
+    <div class="field"><label>Tipo de conexão *</label>
+      <div class="toggle-row">
+        ${['Niple','Joelho','Bucha redutora','Tê','União','Plug'].map(s=>`<div class="tog-opt ${item.tipo===s?'sel':''}" onclick="togOpt(this,'cat-tip-con')">${s}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Bitola</label>
+        <select id="cat-bit-con">${['1/8"','1/4"','3/8"','1/2"','3/4"','1"','1.1/4"','1.1/2"','2"'].map(s=>`<option>${s} NPT</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Material</label>
+        <div class="toggle-row">
+          <div class="tog-opt sel" onclick="togOpt(this,'cat-mat-con')">Galv.</div>
+          <div class="tog-opt" onclick="togOpt(this,'cat-mat-con')">Inox</div>
+          <div class="tog-opt" onclick="togOpt(this,'cat-mat-con')">Bronze</div>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Descrição curta *</label>
+      <input type="text" id="cat-desc-con" placeholder="Ex: Niple 1/4\" NPT Galv. L=50mm" value="${item.desc_curta||''}">
+    </div>`
+};
+
+function abrirModalCatalogo(item=null) {
+  const labels = { manometro:'Manômetro', valvula:'Válvula de Segurança', purgador:'Purgador', dcbi:'DCBI', conexao:'Conexão' };
+  document.getElementById('modal-cat-title').textContent = (item ? 'Editar' : 'Novo') + ' — ' + labels[currentCatTab];
+  document.getElementById('modal-cat-body').innerHTML = (catForms[currentCatTab] || (() => '<p>Formulário em breve</p>'))(item || {});
+  document.getElementById('modal-cat-body').dataset.editId = item?.id || '';
+  openModal('modal-catalogo');
+}
+
+async function salvarItemCatalogo() {
+  const editId = document.getElementById('modal-cat-body').dataset.editId;
+  const arr = DB.catalogo[currentCatTab];
+  const newId = editId || currentCatTab.toUpperCase().slice(0,3) + '-' + String(arr.length + 1).padStart('3','0');
+  // Extrai campos comuns (simplificado — em produção cada tipo extrai seus campos)
+  let nome = '', detalhe = '', badges = [], calib = false, marca = '';
+  if (currentCatTab === 'manometro') {
+    const subtipo = getTogVal('cat-subtipo') || 'Manômetro';
+    const fluido = getTogVal('cat-fluido') || 'Glicerinado';
+    const rosca = getTogVal('cat-rosca') || '1/4" NPT';
+    const entrada = getTogVal('cat-entrada') || 'Reta';
+    const caixa = document.getElementById('cat-caixa')?.value || '100 mm';
+    const escala = document.getElementById('cat-escala')?.value || '';
+    const escShort = escala.replace('kgf/cm²','kgf').split('(')[0].trim();
+    marca = document.getElementById('cat-marca')?.value || 'Wika';
+    calib = getTogVal('cat-calib') === 'Sim';
+    nome = `${subtipo} ${fluido} ${caixa}${entrada==='Angular'?' Angular':''}`;
+    detalhe = `${rosca} · ${entrada} · ${escShort}`;
+    badges = [fluido, caixa, rosca, escShort].filter(Boolean);
+  } else if (currentCatTab === 'valvula') {
+    const bitE = document.getElementById('cat-bit-ent')?.value || '1/2"';
+    const fluido = getTogVal('cat-fluido-v') || 'AR';
+    const pa = document.getElementById('cat-pa')?.value || '';
+    const mat = getTogVal('cat-mat') || 'Aço inox';
+    marca = document.getElementById('cat-marca-v')?.value || 'Leser';
+    nome = `Válvula de Segurança ${bitE} ${fluido}`;
+    detalhe = `PA=${pa} kgf · ${mat} · ${marca}`;
+    badges = [bitE, fluido, pa ? pa+' kgf' : '', mat].filter(Boolean);
+    calib = true;
+  } else {
+    nome = 'Novo item ' + currentCatTab;
+    detalhe = '';
+    badges = [];
+  }
+  const obj = { id: newId, nome, detalhe, marca, badges, calib, ativo: true, tipo: nome.split(' ')[0] };
+  if (GAS_URL) {
+    try { await gasPost('salvarItemCatalogo', { tipo: currentCatTab, ...obj }); } catch(e) {}
+  }
+  if (editId) { const i = arr.findIndex(x => x.id === editId); if (i>=0) arr[i] = { ...arr[i], ...obj }; }
+  else arr.push(obj);
+  closeModal('modal-catalogo');
+  renderCatalogo();
+  showToast('Item salvo no catálogo ✓');
+}
+
+function getTogVal(group) {
+  const el = document.querySelector(`.tog-opt.sel[onclick*="${group}"]`);
+  return el ? el.textContent.trim() : null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KITS
+// ═══════════════════════════════════════════════════════════════
+function renderKits(q='') {
+  const grid = document.getElementById('kitGrid');
+  const tipoF = document.getElementById('kitTipoFilter')?.value || '';
+  q = q || document.querySelector('#view-kits input')?.value || '';
+  const data = DB.kits.filter(k => k.ativo &&
+    (!q || k.nome.toLowerCase().includes(q.toLowerCase())) &&
+    (!tipoF || k.tipo_kit === tipoF));
+  if (!data.length) {
+    grid.innerHTML = '<div style="color:var(--text2);padding:20px">Nenhum kit encontrado</div>';
+    return;
+  }
+  const kitIcon = { simples: '🔧', dcbi: '🔒' };
+  grid.innerHTML = data.map(k => `
+    <div class="kit-card">
+      <div class="kc-title">${kitIcon[k.tipo_kit]||'📦'} ${k.nome}</div>
+      <div class="kc-sub">
+        <span class="badge badge-blue">${k.bitola}</span>
+        <span class="badge ${k.tipo_kit==='dcbi'?'badge-pend':'badge-gray'}" style="margin-left:4px">${k.tipo_kit.toUpperCase()}</span>
+        ${k.inclui_rs ? '<span class="badge badge-warn" style="margin-left:4px">Com RS</span>' : ''}
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">Componentes</div>
+      ${(k.componentes||[]).map(c=>`<div class="kit-comp"><strong>·</strong> ${c}</div>`).join('')}
+      <div style="display:flex;gap:6px;margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+        <button class="btn btn-ghost btn-sm" onclick="editarKit('${k.id}')">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmarExclusao('kit','${k.id}','${k.nome}')">🗑 Remover</button>
+      </div>
+    </div>`).join('') + `
+    <div class="add-card" onclick="abrirModalKit()">
+      <div class="ac-icon">🧰</div>
+      <div class="ac-label">Novo Kit</div>
+    </div>`;
+}
+
+function abrirModalKit(id=null) {
+  document.getElementById('modal-kit-title').textContent = id ? 'Editar Kit' : 'Novo Kit de Instalação';
+  const k = id ? DB.kits.find(x => x.id === id) : {};
+  document.getElementById('kit-id').value = id || '';
+  document.getElementById('kit-nome').value = k.nome || '';
+  document.getElementById('kit-bitola').value = k.bitola || '1/4" NPT';
+  document.getElementById('kit-componentes').value = k.componentes ? JSON.stringify(k.componentes, null, 2) : '';
+  // Set toggles
+  document.querySelectorAll('[onclick*="kit-tipo"]').forEach(el => {
+    el.classList.toggle('sel', el.textContent.trim().toLowerCase() === (k.tipo_kit || 'simples'));
+  });
+  document.querySelectorAll('[onclick*="kit-rs"]').forEach(el => {
+    el.classList.toggle('sel', (el.textContent.trim() === 'Sim') === (k.inclui_rs || false));
+  });
+  openModal('modal-kit');
+}
+
+function editarKit(id) { abrirModalKit(id); }
+
+async function salvarKit() {
+  const nome = document.getElementById('kit-nome').value.trim();
+  if (!nome) { showToast('Nome é obrigatório', 'err'); return; }
+  let componentes = [];
+  try { componentes = JSON.parse(document.getElementById('kit-componentes').value || '[]'); } catch(e) { showToast('JSON de componentes inválido', 'err'); return; }
+  const id = document.getElementById('kit-id').value;
+  const tipo = getTogVal('kit-tipo')?.toLowerCase() || 'simples';
+  const inclui_rs = getTogVal('kit-rs') === 'Sim';
+  const obj = {
+    id: id || 'KIT-' + String(DB.kits.length + 1).padStart('3','0'),
+    nome, bitola: document.getElementById('kit-bitola').value,
+    tipo_kit: tipo, componentes, inclui_rs, ativo: true
+  };
+  if (GAS_URL) {
+    try { await gasPost('salvarItemCatalogo', { tipo: 'kits', ...obj }); } catch(e) {}
+  }
+  if (id) { const i = DB.kits.findIndex(x => x.id === id); if (i>=0) DB.kits[i] = obj; }
+  else DB.kits.push(obj);
+  closeModal('modal-kit');
+  renderKits();
+  showToast('Kit salvo ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXCLUSÃO
+// ═══════════════════════════════════════════════════════════════
+function confirmarExclusao(tipo, id, label) {
+  document.getElementById('confirm-msg').innerHTML = `Deseja remover <strong>${label}</strong>? Esta ação não pode ser desfeita.`;
+  document.getElementById('confirm-btn').onclick = () => {
+    excluir(tipo, id);
+    closeModal('modal-confirm');
+  };
+  openModal('modal-confirm');
+}
+
+function excluir(tipo, id) {
+  if (tipo === 'cliente') DB.clientes = DB.clientes.filter(x => x.id_cliente !== id), renderClientes(), populateClienteSelects();
+  else if (tipo === 'os') DB.os = DB.os.filter(x => x.id_os !== id), renderOS();
+  else if (tipo === 'equip') DB.equipamentos = DB.equipamentos.filter(x => x.id_equipamento !== id), renderEquipamentos();
+  else if (tipo === 'kit') DB.kits = DB.kits.filter(x => x.id !== id), renderKits();
+  showToast('Removido ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function populateClienteSelects() {
+  const opts = DB.clientes.filter(c=>c.ativo).map(c=>`<option value="${c.id_cliente}">${c.nome}</option>`).join('');
+  const sel = document.getElementById('selEquipCliente');
+  if (sel) sel.innerHTML = '<option value="">Todos os clientes</option>' + opts;
+}
+
+function fmt(dateStr) {
+  if (!dateStr) return '—';
+  const [y,m,d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function filterTable(tbodyId, q) {
+  if (tbodyId === 'tbl-clientes') renderClientes();
+  else if (tbodyId === 'tbl-os') renderOS();
+  else if (tbodyId === 'tbl-equip') renderEquipamentos();
+}
+
+// ── MODAL ──────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+// ── TOG OPTS ──────────────────────────────────────────────────
+function togOpt(el, group) {
+  el.closest('.toggle-row').querySelectorAll('.tog-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// ── VIEW SWITCHING ────────────────────────────────────────────
+const VIEW_CONFIG = {
+  clientes:    { title: 'Clientes',              btnLabel: '+ Novo Cliente',      newFn: () => abrirModalCliente() },
+  os:          { title: 'Ordens de Serviço',     btnLabel: '+ Nova OS',           newFn: () => abrirModalOS() },
+  equipamentos:{ title: 'Equipamentos',          btnLabel: '+ Novo Equipamento',  newFn: () => abrirModalEquip() },
+  catalogo:    { title: 'Catálogo de Peças',     btnLabel: '+ Novo Item',         newFn: () => abrirModalCatalogo() },
+  kits:        { title: 'Kits de Instalação',    btnLabel: '+ Novo Kit',          newFn: () => abrirModalKit() },
+};
+
+function setView(id, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const cfg = VIEW_CONFIG[id];
+  document.getElementById('topTitle').textContent = cfg.title;
+  document.getElementById('btnTopNew').textContent = cfg.btnLabel;
+  if (id === 'catalogo') renderCatalogo();
+  if (id === 'kits') renderKits();
+}
+
+function topNew() {
+  const active = document.querySelector('.view.active');
+  const id = active?.id?.replace('view-', '');
+  VIEW_CONFIG[id]?.newFn();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+let _tt;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type === 'err' ? 'show err' : type === 'warn' ? 'show' : 'show';
+  if (type === 'err') t.style.background = 'var(--danger)';
+  else if (type === 'warn') t.style.background = 'var(--warn)';
+  else t.style.background = 'var(--ok)';
+  clearTimeout(_tt);
+  _tt = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+function renderAll() {
+  renderClientes();
+  renderOS();
+  renderEquipamentos();
+  populateClienteSelects();
+}
+
+initDemoData();
+renderAll();
+
+// GAS connection attempt
+setTimeout(() => {
+  if (!GAS_URL) {
+    setGASStatus('', 'Modo local (sem GAS)');
+    document.getElementById('gasDot').style.background = 'var(--warn)';
+  } else {
+    syncGAS();
+  }
+}, 600);
+</script>
+</body>
+</html>
