@@ -770,19 +770,34 @@ async function salvarCliente() {
   if (!nome) { showToast('Nome é obrigatório', 'err'); return; }
   const id = document.getElementById('cli-id').value;
   const obj = {
-    id_cliente: id || 'CLI-' + String(DB.clientes.length + 1).padStart('3','0'),
     nome, cnpj: document.getElementById('cli-cnpj').value,
     contato: document.getElementById('cli-contato').value,
     endereco: document.getElementById('cli-endereco').value,
     observacoes: document.getElementById('cli-obs').value,
     ativo: true
   };
+  // Só envia id_cliente se for edição de existente
+  if (id) obj.id_cliente = id;
+
   if (GAS_URL) {
     try {
       const r = await gasPost('salvarCliente', obj);
-      if (r.ok) obj.id_cliente = r.id_cliente || obj.id_cliente;
-    } catch(e) { showToast('Salvo localmente (sem GAS)', 'warn'); }
+      if (r.status !== 'ok') {
+        showToast('Erro ao salvar cliente: ' + (r.mensagem || r.codigo || 'Falha na GAS'), 'err');
+        return;
+      }
+      // Usa o id retornado pela GAS (criação) ou mantém o existente (edição)
+      obj.id_cliente = r.id_cliente || id;
+    } catch(e) {
+      showToast('Erro de comunicação com a GAS: ' + e.message, 'err');
+      return;
+    }
+  } else {
+    // Fallback local apenas quando GAS_URL não estiver configurado
+    obj.id_cliente = id || 'CLI-' + String(DB.clientes.length + 1).padStart(3,'0');
   }
+
+  // Só atualiza o DB local após confirmação positiva
   if (id) {
     const i = DB.clientes.findIndex(c => c.id_cliente === id);
     if (i >= 0) DB.clientes[i] = obj;
@@ -843,19 +858,38 @@ function editarOS(id) { abrirModalOS(id); }
 async function salvarOS() {
   const num = document.getElementById('os-numero').value.trim();
   const cliId = document.getElementById('os-cliente').value;
+  const descricao = document.getElementById('os-descricao').value.trim();
   if (!num || !cliId) { showToast('Nº OS e cliente são obrigatórios', 'err'); return; }
+  if (!descricao) { showToast('Descrição é obrigatória', 'err'); return; }
   const cli = DB.clientes.find(c => c.id_cliente === cliId);
   const id = document.getElementById('os-id').value;
   const obj = {
-    id_os: id || 'OS-' + String(DB.os.length + 1).padStart('3','0'),
     id_cliente: cliId, cliente: cli.nome,
-    numero_os: num, descricao: document.getElementById('os-descricao').value,
+    numero_os: num, descricao,
     data_abertura: document.getElementById('os-data').value,
     status: 'Fase 1', fase_atual: 1
   };
+  // Só envia id_os se for edição de existente
+  if (id) obj.id_os = id;
+
   if (GAS_URL) {
-    try { await gasPost('salvarOS', obj); } catch(e) {}
+    try {
+      const r = await gasPost('salvarOS', obj);
+      if (r.status !== 'ok') {
+        showToast('Erro ao salvar OS: ' + (r.mensagem || r.codigo || 'Falha na GAS'), 'err');
+        return;
+      }
+      obj.id_os = r.id_os || id;
+    } catch(e) {
+      showToast('Erro de comunicação com a GAS: ' + e.message, 'err');
+      return;
+    }
+  } else {
+    // Fallback local apenas quando GAS_URL não estiver configurado
+    obj.id_os = id || 'OS-' + String(DB.os.length + 1).padStart(3,'0');
   }
+
+  // Só atualiza o DB local após confirmação positiva
   if (id) { const i = DB.os.findIndex(x => x.id_os === id); if (i>=0) DB.os[i] = obj; }
   else DB.os.push(obj);
   closeModal('modal-os');
@@ -934,7 +968,6 @@ async function salvarEquipamento() {
   const osId = document.getElementById('eq-os').value;
   const id = document.getElementById('eq-id').value;
   const obj = {
-    id_equipamento: id || 'EQ-' + String(DB.equipamentos.length + 1).padStart('3','0'),
     id_cliente: cliId, cliente: cli.nome, id_os: osId,
     tipo: document.getElementById('eq-tipo').value,
     tag, localizacao: document.getElementById('eq-localizacao').value,
@@ -942,9 +975,27 @@ async function salvarEquipamento() {
     campo_livre: document.getElementById('eq-campo').value,
     cadastrado_por: 'adm'
   };
+  // Só envia id_equipamento se for edição de existente
+  if (id) obj.id_equipamento = id;
+
   if (GAS_URL) {
-    try { await gasPost('salvarEquipamento', obj); } catch(e) {}
+    try {
+      const r = await gasPost('salvarEquipamento', obj);
+      if (r.status !== 'ok') {
+        showToast('Erro ao salvar equipamento: ' + (r.mensagem || r.codigo || 'Falha na GAS'), 'err');
+        return;
+      }
+      obj.id_equipamento = r.id_equipamento || id;
+    } catch(e) {
+      showToast('Erro de comunicação com a GAS: ' + e.message, 'err');
+      return;
+    }
+  } else {
+    // Fallback local apenas quando GAS_URL não estiver configurado
+    obj.id_equipamento = id || 'EQ-' + String(DB.equipamentos.length + 1).padStart(3,'0');
   }
+
+  // Só atualiza o DB local após confirmação positiva
   if (id) { const i = DB.equipamentos.findIndex(x => x.id_equipamento === id); if (i>=0) DB.equipamentos[i] = obj; }
   else DB.equipamentos.push(obj);
   closeModal('modal-equip');
