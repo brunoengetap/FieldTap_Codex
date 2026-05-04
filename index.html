@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TapParts S1 — Engetap</title>
+<title>TapParts S2 — Engetap</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -198,6 +198,32 @@ code { font-size: 11px; color: var(--accent); font-family: monospace; }
 .cat-tab { padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
 .cat-tab:hover { color: var(--text); }
 .cat-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── OS EQUIPAMENTOS PANEL ── */
+.os-equip-panel { background: var(--surf2); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 20px; overflow: hidden; }
+.os-equip-panel-hdr { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surf); }
+.os-equip-panel-hdr h4 { font-family: var(--head); font-size: 15px; font-weight: 700; color: var(--text); }
+.os-equip-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+.os-equip-row:last-child { border-bottom: none; }
+.os-equip-tag  { font-family: var(--head); font-size: 17px; font-weight: 700; color: var(--text); min-width: 70px; }
+.os-equip-tipo { font-size: 12px; color: var(--text2); flex: 1; }
+.os-equip-empty { padding: 14px 16px; font-size: 13px; color: var(--text2); text-align: center; }
+
+/* ── LEVANTAMENTOS ── */
+.lev-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 12px; overflow: hidden; }
+.lev-card-hdr { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surf2); }
+.lev-id   { font-family: monospace; font-size: 13px; font-weight: 700; color: var(--accent); }
+.lev-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.lev-status-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 16px; }
+.status-chip { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+.sc-agcot  { background: #fef3c7; color: #92400e; }
+.sc-campo  { background: #dcfce7; color: #166534; }
+.sc-cotado { background: #dbeafe; color: #1e40af; }
+.sc-reprov { background: #fee2e2; color: #991b1b; }
+
+/* ── ITEM PILL STATUS ── */
+.status-map { display: flex; gap: 6px; flex-wrap: wrap; }
+
 </style>
 </head>
 <body>
@@ -208,7 +234,7 @@ code { font-size: 11px; color: var(--accent); font-family: monospace; }
     <div class="logo-badge">TAP</div>
     <div>
       <div class="logo-name">Parts</div>
-      <div class="logo-sub">Engetap · S1</div>
+      <div class="logo-sub">Engetap · S2</div>
     </div>
   </div>
 
@@ -221,6 +247,10 @@ code { font-size: 11px; color: var(--accent); font-family: monospace; }
   </div>
   <div class="nav-item" onclick="setView('equipamentos',this)" id="nav-equipamentos">
     <span class="ni-icon">🔧</span> Equipamentos
+  </div>
+  <div class="nav-item" onclick="setView('levantamentos',this)" id="nav-levantamentos">
+    <span class="ni-icon">📥</span> Levantamentos FieldTap
+    <span class="ni-badge warn" id="badge-lev">0</span>
   </div>
 
   <div class="nav-section">Catálogos</div>
@@ -236,7 +266,7 @@ code { font-size: 11px; color: var(--accent); font-family: monospace; }
       <div class="gas-dot spin" id="gasDot"></div>
       <span id="gasLabel">Conectando ao GAS…</span>
     </div>
-    <div style="margin-top:6px;font-size:10px;opacity:.5">TapParts · Sprint 1</div>
+    <div style="margin-top:6px;font-size:10px;opacity:.5">TapParts · Sprint 2</div>
   </div>
 </div>
 
@@ -295,10 +325,10 @@ code { font-size: 11px; color: var(--accent); font-family: monospace; }
         </div>
         <table>
           <thead><tr>
-            <th>Nº OS</th><th>Cliente</th><th>Abertura</th><th>Descrição</th><th>Fase</th><th>Status</th><th>Ações</th>
+            <th>Nº OS</th><th>Cliente</th><th>Abertura</th><th>Descrição</th><th>Equipamentos</th><th>Fase</th><th>Status</th><th>Ações</th>
           </tr></thead>
           <tbody id="tbl-os">
-            <tr><td colspan="7"><div class="empty-state"><div class="ei">📋</div>Nenhuma OS cadastrada ainda</div></td></tr>
+            <tr><td colspan="8"><div class="empty-state"><div class="ei">📋</div>Nenhuma OS cadastrada ainda</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -368,6 +398,21 @@ code { font-size: 11px; color: var(--accent); font-family: monospace; }
         </select>
       </div>
       <div class="cat-grid" id="kitGrid"></div>
+    </div>
+
+    <!-- ══ VIEW: LEVANTAMENTOS ══ -->
+    <div class="view" id="view-levantamentos">
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <input type="text" id="lev-search" placeholder="Buscar por OS, cliente, ID levantamento..." oninput="renderLevantamentos()">
+        </div>
+        <select class="filter-select" id="lev-os-filter" onchange="renderLevantamentos()">
+          <option value="">Todas as OS</option>
+        </select>
+      </div>
+      <div id="lev-container">
+        <div class="empty-state"><div class="ei">📥</div>Nenhum levantamento recebido ainda</div>
+      </div>
     </div>
 
   </div><!-- /content -->
@@ -593,6 +638,76 @@ code { font-size: 11px; color: var(--accent); font-family: monospace; }
   </div>
 </div>
 
+<!-- ══ MODAL: EQUIPAMENTOS DA OS ══ -->
+<div class="modal-overlay" id="modal-os-equips">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="modal-oseq-title">Equipamentos — OS</h3>
+      <button class="modal-close" onclick="closeModal('modal-os-equips')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box">Equipamentos vinculados a esta OS. O FieldTap exibirá exatamente esta lista para o inspetor.</div>
+      <div id="oseq-list" style="margin-bottom:16px"></div>
+      <div class="section-title" style="font-size:14px;margin-bottom:10px">Vincular equipamento existente</div>
+      <div class="field">
+        <label>Selecionar equipamento do cliente</label>
+        <select id="oseq-sel-equip">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:12px" onclick="vincularEquipamento()">🔗 Vincular à OS</button>
+      <div class="section-title" style="font-size:14px;margin-bottom:10px">Cadastrar novo equipamento</div>
+      <div class="field-row">
+        <div class="field">
+          <label>TAG *</label>
+          <input type="text" id="oseq-tag" placeholder="VP-05">
+        </div>
+        <div class="field">
+          <label>Tipo *</label>
+          <select id="oseq-tipo">
+            <option value="vaso">Vaso de pressão</option>
+            <option value="caldeira">Caldeira</option>
+            <option value="tubulacao">Tubulação</option>
+            <option value="tanque">Tanque</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>PMTA (kgf/cm²)</label>
+          <input type="number" id="oseq-pmta" placeholder="10" step="0.1">
+        </div>
+        <div class="field">
+          <label>Localização</label>
+          <input type="text" id="oseq-loc" placeholder="Sala de compressores">
+        </div>
+      </div>
+      <div class="field">
+        <label>Campo livre</label>
+        <input type="text" id="oseq-campo" placeholder="Fabricante, número de série...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-os-equips')">Fechar</button>
+      <button class="btn btn-primary" onclick="salvarEquipamentoDaOS()">💾 Adicionar novo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: DETALHE LEVANTAMENTO ══ -->
+<div class="modal-overlay" id="modal-lev-detail">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="lev-detail-title">Levantamento</h3>
+      <button class="modal-close" onclick="closeModal('modal-lev-detail')">×</button>
+    </div>
+    <div class="modal-body" id="lev-detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-lev-detail')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -608,6 +723,7 @@ let DB = {
   clientes: [],
   os: [],
   equipamentos: [],
+  levantamentos: [],
   catalogo: {
     manometro: [],
     valvula: [],
@@ -669,6 +785,20 @@ function initDemoData() {
     { id:'KIT-003', nome:'Kit Simples 1/2" NPT', bitola:'1/2" NPT', tipo_kit:'simples', componentes:['Niple 1/2" NPT (x2)','Joelho 1/2" 90°'], inclui_rs:false, ativo:true },
     { id:'KIT-004', nome:'Kit DCBI 1/2" NPT', bitola:'1/2" NPT', tipo_kit:'dcbi', componentes:['Niple 1/2" NPT (x3)','Joelho 1/2" 90°','Válvula agulha 1/2" (x3)'], inclui_rs:true, ativo:true },
   ];
+  DB.levantamentos = [
+    {
+      id_levantamento: 'LEV-2026-001', id_os: 'OS-001', id_cliente: 'CLI-001',
+      id_inspetor: 'INS-001', nome_inspetor: 'João Silva', fase: '1',
+      timestamp_envio: '2026-04-21T10:30:00', total_itens: 4, status_geral: 'aguardando_cotacao',
+      resumo_status: { aguardando_cotacao: 3, instalado_campo: 1 }
+    },
+    {
+      id_levantamento: 'LEV-2026-002', id_os: 'OS-002', id_cliente: 'CLI-002',
+      id_inspetor: 'INS-002', nome_inspetor: 'Maria Oliveira', fase: '1',
+      timestamp_envio: '2026-04-29T14:15:00', total_itens: 2, status_geral: 'aguardando_cotacao',
+      resumo_status: { aguardando_cotacao: 2 }
+    },
+  ];
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -702,14 +832,18 @@ async function syncGAS() {
   }
   setGASStatus('spin', 'Sincronizando…');
   try {
-    const [clis, oss] = await Promise.all([
+    const [clis, oss, equips] = await Promise.all([
       gasGet('getClientes'),
       gasGet('getOS'),
+      gasGet('getEquipamentosByCliente', {}),
     ]);
     if (clis.status === 'ok') DB.clientes = clis.clientes;
     if (oss.status === 'ok')  DB.os = oss.os;
+    if (equips.status === 'ok') DB.equipamentos = equips.equipamentos || DB.equipamentos;
     setGASStatus('ok', 'GAS conectado ✓');
+    await syncLevantamentos();
     renderAll();
+    renderLevantamentos();
     showToast('Dados sincronizados com o GAS ✓');
   } catch(e) {
     setGASStatus('err', 'Erro de conexão');
@@ -819,25 +953,35 @@ function renderOS() {
   let data = DB.os.filter(o => !q || o.numero_os?.includes(q) || o.cliente?.toLowerCase().includes(q) || o.descricao?.toLowerCase().includes(q));
   document.getElementById('cnt-os').textContent = data.length + ' OS';
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="ei">📋</div>Nenhuma OS encontrada</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="ei">📋</div>Nenhuma OS encontrada</div></td></tr>';
     return;
   }
   const phaseClass = { 'Fase 1':'phase-1','Fase 2':'phase-2','Encerrada':'phase-enc' };
-  tbody.innerHTML = data.map(o => `
+  tbody.innerHTML = data.map(o => {
+    const equipsVinc = DB.equipamentos.filter(e => e.id_os === o.id_os || e.id_os === o.numero_os);
+    const eqCount = equipsVinc.length;
+    return `
     <tr>
       <td><code style="font-size:13px;font-weight:700">${o.numero_os}</code></td>
       <td><strong>${o.cliente}</strong></td>
       <td style="font-size:12px;color:var(--text2)">${fmt(o.data_abertura)}</td>
-      <td style="max-width:200px;font-size:12px">${o.descricao || '—'}</td>
-      <td><span class="phase-badge ${phaseClass[o.status] || 'phase-1'}">${o.status}</span></td>
-      <td><span class="pill ${o.status === 'Encerrada' ? 'pill-enc' : 'pill-f1'}">${o.status === 'Encerrada' ? '✓ Concluída' : '🔄 Em andamento'}</span></td>
+      <td style="max-width:180px;font-size:12px">${o.descricao || '—'}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="badge ${eqCount>0?'badge-ok':'badge-gray'}">${eqCount} equip.</span>
+          <button class="btn btn-ghost btn-sm" onclick="abrirEquipamentosOS('${o.id_os}')" title="Gerenciar equipamentos">🔧</button>
+        </div>
+      </td>
+      <td><span class="phase-badge ${phaseClass[o.status]||'phase-1'}">${o.status}</span></td>
+      <td><span class="pill ${o.status==='Encerrada'?'pill-enc':'pill-f1'}">${o.status==='Encerrada'?'✓ Concluída':'🔄 Em andamento'}</span></td>
       <td>
         <div style="display:flex;gap:4px">
-          <button class="btn btn-ghost btn-sm" onclick="editarOS('${o.id_os}')">✏️ Editar</button>
+          <button class="btn btn-ghost btn-sm" onclick="editarOS('${o.id_os}')">✏️</button>
           <button class="btn btn-danger btn-sm" onclick="confirmarExclusao('os','${o.id_os}','OS '+o.numero_os)">🗑</button>
         </div>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 function abrirModalOS(id=null) {
@@ -895,6 +1039,261 @@ async function salvarOS() {
   closeModal('modal-os');
   renderOS();
   showToast('OS salva ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OS — GERENCIAR EQUIPAMENTOS VINCULADOS
+// ═══════════════════════════════════════════════════════════════
+let _osEquipContext = null; // id_os corrente no modal
+
+function abrirEquipamentosOS(idOS) {
+  _osEquipContext = idOS;
+  const os = DB.os.find(o => o.id_os === idOS);
+  document.getElementById('modal-oseq-title').textContent = 'Equipamentos — OS ' + (os?.numero_os || idOS);
+  renderOSEquipList(idOS);
+  // popula select com equipamentos do mesmo cliente sem OS vinculada (ou vinculáveis)
+  const cli = os?.id_cliente;
+  const todos = DB.equipamentos.filter(e => e.id_cliente === cli && (e.ativo !== false));
+  const sel = document.getElementById('oseq-sel-equip');
+  sel.innerHTML = '<option value="">— Selecione —</option>' +
+    todos.map(e => `<option value="${e.id_equipamento}">${e.tag} · ${e.tipo}</option>`).join('');
+  // limpa form novo
+  ['oseq-tag','oseq-pmta','oseq-loc','oseq-campo'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('oseq-tipo').value = 'vaso';
+  openModal('modal-os-equips');
+}
+
+function renderOSEquipList(idOS) {
+  const equips = DB.equipamentos.filter(e => e.id_os === idOS && e.ativo !== false);
+  const el = document.getElementById('oseq-list');
+  if (!equips.length) {
+    el.innerHTML = '<div class="os-equip-panel"><div class="os-equip-empty">Nenhum equipamento vinculado ainda.</div></div>';
+    return;
+  }
+  const TIPO_ICON = { vaso:'🔵', 'Vaso de pressão':'🔵', caldeira:'🔥', tubulacao:'〰️', tanque:'🛢️' };
+  el.innerHTML = '<div class="os-equip-panel">' +
+    '<div class="os-equip-panel-hdr"><h4>Equipamentos vinculados</h4><span class="badge badge-ok">' + equips.length + ' equip.</span></div>' +
+    equips.map(e => `
+      <div class="os-equip-row">
+        <span style="font-size:18px">${TIPO_ICON[e.tipo]||'🔧'}</span>
+        <div class="os-equip-tag">${e.tag}</div>
+        <div class="os-equip-tipo">${e.tipo}${e.pmta?' · PMTA: '+e.pmta+' kgf/cm²':''}${e.localizacao?' · '+e.localizacao:''}</div>
+        <button class="btn btn-danger btn-sm" onclick="desvincularEquip('${e.id_equipamento}','${idOS}')" title="Desvincular">✕</button>
+      </div>`).join('') +
+    '</div>';
+}
+
+async function vincularEquipamento() {
+  const eqId = document.getElementById('oseq-sel-equip').value;
+  if (!eqId) { showToast('Selecione um equipamento', 'err'); return; }
+  const eq = DB.equipamentos.find(e => e.id_equipamento === eqId);
+  if (!eq) return;
+  const old = eq.id_os;
+  eq.id_os = _osEquipContext;
+  if (GAS_URL) {
+    try {
+      await gasPost('salvarEquipamento', { id_equipamento: eqId, id_cliente: eq.id_cliente, tipo: eq.tipo, tag: eq.tag, id_os: _osEquipContext });
+    } catch(e) {}
+  }
+  renderOSEquipList(_osEquipContext);
+  renderOS();
+  renderEquipamentos();
+  showToast('Equipamento vinculado ✓');
+}
+
+async function desvincularEquip(eqId, idOS) {
+  const eq = DB.equipamentos.find(e => e.id_equipamento === eqId);
+  if (!eq) return;
+  eq.id_os = '';
+  if (GAS_URL) {
+    try {
+      await gasPost('salvarEquipamento', { id_equipamento: eqId, id_cliente: eq.id_cliente, tipo: eq.tipo, tag: eq.tag, id_os: '' });
+    } catch(e) {}
+  }
+  renderOSEquipList(idOS);
+  renderOS();
+  renderEquipamentos();
+  showToast('Equipamento desvinculado');
+}
+
+async function salvarEquipamentoDaOS() {
+  const tag = document.getElementById('oseq-tag').value.trim();
+  if (!tag) { showToast('TAG é obrigatória', 'err'); return; }
+  const os = DB.os.find(o => o.id_os === _osEquipContext);
+  if (!os) return;
+  const obj = {
+    id_cliente: os.id_cliente,
+    cliente: os.cliente,
+    id_os: _osEquipContext,
+    tipo: document.getElementById('oseq-tipo').value,
+    tag,
+    localizacao: document.getElementById('oseq-loc').value,
+    pmta: document.getElementById('oseq-pmta').value,
+    campo_livre: document.getElementById('oseq-campo').value,
+    cadastrado_por: 'adm',
+    ativo: true
+  };
+  if (GAS_URL) {
+    try {
+      const r = await gasPost('salvarEquipamento', obj);
+      if (r.status === 'ok') obj.id_equipamento = r.id_equipamento;
+    } catch(e) {}
+  }
+  if (!obj.id_equipamento) obj.id_equipamento = 'EQ-' + String(DB.equipamentos.length + 1).padStart(3,'0');
+  DB.equipamentos.push(obj);
+  ['oseq-tag','oseq-pmta','oseq-loc','oseq-campo'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
+  renderOSEquipList(_osEquipContext);
+  renderOS();
+  renderEquipamentos();
+  populateClienteSelects();
+  showToast('Equipamento adicionado à OS ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEVANTAMENTOS
+// ═══════════════════════════════════════════════════════════════
+function renderLevantamentos() {
+  const q = (document.getElementById('lev-search')?.value || '').toLowerCase();
+  const osFilter = document.getElementById('lev-os-filter')?.value || '';
+  let data = DB.levantamentos || [];
+  if (q) data = data.filter(l => l.id_levantamento?.toLowerCase().includes(q) || l.id_os?.toLowerCase().includes(q) || l.nome_inspetor?.toLowerCase().includes(q));
+  if (osFilter) data = data.filter(l => l.id_os === osFilter);
+  const container = document.getElementById('lev-container');
+  if (!data.length) {
+    container.innerHTML = '<div class="empty-state"><div class="ei">📥</div>Nenhum levantamento recebido</div>';
+    return;
+  }
+  // badge count
+  const totalPend = data.reduce((s,l) => s + (l.resumo_status?.aguardando_cotacao||0), 0);
+  const badge = document.getElementById('badge-lev');
+  if (badge) { badge.textContent = totalPend; badge.style.display = totalPend ? '' : 'none'; }
+
+  const STATUS_PT = {
+    aguardando_cotacao: 'Ag. Cotação',
+    instalado_campo: 'Instal. campo',
+    cotado: 'Cotado',
+    reprovado_cliente: 'Reprovado',
+    concluido: 'Concluído'
+  };
+  const STATUS_CLASS = {
+    aguardando_cotacao: 'sc-agcot',
+    instalado_campo: 'sc-campo',
+    cotado: 'sc-cotado',
+    reprovado_cliente: 'sc-reprov',
+    concluido: 'sc-campo'
+  };
+
+  container.innerHTML = data.map(l => {
+    const resumo = l.resumo_status || {};
+    const chips = Object.entries(resumo).map(([k,v]) =>
+      `<span class="status-chip ${STATUS_CLASS[k]||''}">${STATUS_PT[k]||k}: ${v}</span>`
+    ).join('');
+    const os = DB.os.find(o => o.id_os === l.id_os);
+    return `<div class="lev-card">
+      <div class="lev-card-hdr">
+        <div>
+          <div class="lev-id">${l.id_levantamento}</div>
+          <div class="lev-meta">OS ${l.id_os}${os?' · '+os.cliente:''} · Fase ${l.fase} · ${l.nome_inspetor} · ${fmtDateTime(l.timestamp_envio)}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge badge-blue">${l.total_itens} iten${l.total_itens!=1?'s':'s'}</span>
+          <button class="btn btn-ghost btn-sm" onclick="verDetalheLev('${l.id_levantamento}')">👁 Ver itens</button>
+        </div>
+      </div>
+      <div class="lev-status-row">${chips || '<span style="font-size:12px;color:var(--text2)">Sem itens registrados</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+async function verDetalheLev(idLev) {
+  document.getElementById('lev-detail-title').textContent = 'Levantamento ' + idLev;
+  const body = document.getElementById('lev-detail-body');
+  body.innerHTML = '<div class="empty-state"><div class="ei">⏳</div>Carregando itens…</div>';
+  openModal('modal-lev-detail');
+  let itens = [];
+  try {
+    const r = await gasGet('getItensByLevantamento', { id_levantamento: idLev });
+    if (r.status === 'ok') itens = r.itens;
+  } catch(e) {}
+  if (!itens.length) {
+    body.innerHTML = '<div class="empty-state"><div class="ei">📦</div>Nenhum item encontrado</div>';
+    return;
+  }
+  // agrupar por equipamento
+  const byEquip = {};
+  itens.forEach(it => {
+    const k = it.tag_equipamento || it.id_equipamento || 'Sem TAG';
+    if (!byEquip[k]) byEquip[k] = [];
+    byEquip[k].push(it);
+  });
+  const STATUS_COLOR = {
+    aguardando_cotacao: 'badge-warn',
+    instalado_campo: 'badge-ok',
+    cotado: 'badge-blue',
+    reprovado_cliente: 'badge-danger',
+    concluido: 'badge-ok'
+  };
+  let html = '';
+  Object.entries(byEquip).forEach(([tag, items]) => {
+    html += `<div style="margin-bottom:16px">
+      <div style="font-family:var(--head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">🔧 ${tag}</div>`;
+    items.forEach(it => {
+      const calib = String(it.requer_calibracao) === 'true';
+      const inst  = String(it.instalado_imediatamente) === 'true';
+      const escala = (it.escala_inicio !== undefined && it.escala_inicio !== '')
+        ? `${it.escala_inicio}–${it.escala_fim} ${it.escala_unidade}` : '';
+      html += `<div style="background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">${it.descricao_curta}</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">
+              Qtd: ${it.quantidade}${escala?' · '+escala:''}
+            </div>
+          </div>
+          <span class="badge ${STATUS_COLOR[it.status]||'badge-gray'}">${it.status||'—'}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          ${inst ? '<span class="pill pill-ok" style="font-size:10px">⚡ Instalado agora</span>' : '<span class="pill pill-blue" style="font-size:10px">📋 Pipeline</span>'}
+          ${calib ? '<span class="pill pill-warn" style="font-size:10px">Calibração NR-13</span>' : ''}
+          ${it.id_kit ? '<span class="pill pill-gray" style="font-size:10px">Kit incl.</span>' : ''}
+        </div>
+        <code style="display:block;font-size:10px;color:var(--text3);margin-top:6px">${it.id_item}</code>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  body.innerHTML = html;
+}
+
+async function syncLevantamentos() {
+  if (!GAS_URL) return;
+  try {
+    const r = await gasGet('getLevantamentosByCliente');
+    if (r.status === 'ok') {
+      DB.levantamentos = r.levantamentos || [];
+      // popula filtro OS
+      const osIds = [...new Set(DB.levantamentos.map(l=>l.id_os))];
+      const sel = document.getElementById('lev-os-filter');
+      if (sel) {
+        sel.innerHTML = '<option value="">Todas as OS</option>' +
+          osIds.map(id => {
+            const os = DB.os.find(o=>o.id_os===id);
+            return `<option value="${id}">OS ${os?.numero_os||id}${os?' · '+os.cliente:''}</option>`;
+          }).join('');
+      }
+      const badge = document.getElementById('badge-lev');
+      const total = DB.levantamentos.length;
+      if (badge) { badge.textContent = total; badge.style.display = total ? '' : 'none'; }
+    }
+  } catch(e) {}
+}
+
+function fmtDateTime(ts) {
+  if (!ts) return '—';
+  try {
+    const d = new Date(ts);
+    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  } catch(e) { return ts; }
 }
 
 function filterOSStatus(v) {
@@ -1429,11 +1828,12 @@ function togOpt(el, group) {
 
 // ── VIEW SWITCHING ────────────────────────────────────────────
 const VIEW_CONFIG = {
-  clientes:    { title: 'Clientes',              btnLabel: '+ Novo Cliente',      newFn: () => abrirModalCliente() },
-  os:          { title: 'Ordens de Serviço',     btnLabel: '+ Nova OS',           newFn: () => abrirModalOS() },
-  equipamentos:{ title: 'Equipamentos',          btnLabel: '+ Novo Equipamento',  newFn: () => abrirModalEquip() },
-  catalogo:    { title: 'Catálogo de Peças',     btnLabel: '+ Novo Item',         newFn: () => abrirModalCatalogo() },
-  kits:        { title: 'Kits de Instalação',    btnLabel: '+ Novo Kit',          newFn: () => abrirModalKit() },
+  clientes:      { title: 'Clientes',                    btnLabel: '+ Novo Cliente',     newFn: () => abrirModalCliente() },
+  os:            { title: 'Ordens de Serviço',           btnLabel: '+ Nova OS',          newFn: () => abrirModalOS() },
+  equipamentos:  { title: 'Equipamentos',                btnLabel: '+ Novo Equipamento', newFn: () => abrirModalEquip() },
+  levantamentos: { title: 'Levantamentos FieldTap',      btnLabel: '🔄 Sincronizar',      newFn: () => syncLevantamentos().then(renderLevantamentos) },
+  catalogo:      { title: 'Catálogo de Peças',           btnLabel: '+ Novo Item',        newFn: () => abrirModalCatalogo() },
+  kits:          { title: 'Kits de Instalação',          btnLabel: '+ Novo Kit',         newFn: () => abrirModalKit() },
 };
 
 function setView(id, el) {
@@ -1446,6 +1846,7 @@ function setView(id, el) {
   document.getElementById('btnTopNew').textContent = cfg.btnLabel;
   if (id === 'catalogo') renderCatalogo();
   if (id === 'kits') renderKits();
+  if (id === 'levantamentos') { syncLevantamentos().then(renderLevantamentos); }
 }
 
 function topNew() {
@@ -1475,6 +1876,9 @@ function renderAll() {
   renderOS();
   renderEquipamentos();
   populateClienteSelects();
+  // badge levantamentos
+  const badge = document.getElementById('badge-lev');
+  if (badge && DB.levantamentos?.length) badge.textContent = DB.levantamentos.length;
 }
 
 initDemoData();
