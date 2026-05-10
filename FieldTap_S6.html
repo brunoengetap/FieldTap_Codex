@@ -525,9 +525,9 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
   <div class="body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
     <p class="sec-label">Quantas unidades?</p>
     <div class="qty-wrap">
-      <div class="qty-btn" onclick="changeQty(-1)">−</div>
+      <div class="qty-btn" id="qtyBtnMinus">−</div>
       <div class="qty-num" id="qtyDisplay">1</div>
-      <div class="qty-btn" onclick="changeQty(1)">+</div>
+      <div class="qty-btn" id="qtyBtnPlus">+</div>
     </div>
     <p style="font-size:13px;color:var(--text3)">Toque e segure para alterar mais rápido</p>
   </div>
@@ -1380,9 +1380,26 @@ function changeQty(d) {
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.qty-btn').forEach(btn => {
     const dir = btn.textContent.trim() === '−' ? -1 : 1;
-    btn.addEventListener('mousedown', () => { qtyHoldTimer = setInterval(() => changeQty(dir), 100); });
-    btn.addEventListener('touchstart', (e) => { e.preventDefault(); qtyHoldTimer = setInterval(() => changeQty(dir), 100); });
-    ['mouseup','mouseleave','touchend'].forEach(ev => btn.addEventListener(ev, () => clearInterval(qtyHoldTimer)));
+    let holdTimer = null;
+
+    function startHold() {
+      changeQty(dir);
+      holdTimer = setTimeout(() => {
+        holdTimer = setInterval(() => changeQty(dir), 80);
+      }, 400);
+    }
+
+    function stopHold() {
+      clearTimeout(holdTimer);
+      clearInterval(holdTimer);
+      holdTimer = null;
+    }
+
+    btn.addEventListener('mousedown', startHold);
+    btn.addEventListener('touchstart', (e) => { e.preventDefault(); startHold(); }, { passive: false });
+    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev =>
+      btn.addEventListener(ev, stopHold)
+    );
   });
 });
 
