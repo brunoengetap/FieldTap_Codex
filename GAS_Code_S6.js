@@ -223,6 +223,7 @@ function doGet(e) {
       case 'getOSByCliente':            resultado = getOSByCliente(params);            break;
       case 'getEquipamentosByOS':       resultado = getEquipamentosByOS(params);       break;
       case 'getEquipamentosByCliente':  resultado = getEquipamentosByCliente(params);  break;
+      case 'getEquipamentosAll':        resultado = getEquipamentosAll(params);        break;
       case 'getCatalogos':              resultado = getCatalogos(params);              break;
       case 'getCatalogosHash':          resultado = getCatalogosHash(params);          break;
       case 'getCatalogoByTipo':         resultado = getCatalogoByTipo(params);         break;
@@ -410,12 +411,28 @@ function getCatalogoByTipo(params) {
   return { status: 'ok', itens: itens };
 }
 
+
+function getEquipamentosAll(params) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dados = ss.getSheetByName('EQUIPAMENTOS').getDataRange().getValues();
+  var cab = dados[0];
+  var lista = [];
+  for (var i = 1; i < dados.length; i++) {
+    var obj = _linhaParaObjeto(cab, dados[i]);
+    if (String(obj.ativo).toLowerCase() === 'true') {
+      lista.push(obj);
+    }
+  }
+  return { status: 'ok', equipamentos: lista };
+}
 function getKitsByBitola(params) {
   if (!params.bitola) return _erro('CAMPO_OBRIGATORIO', 'bitola é obrigatório.');
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var todos = _lerCatalogo(ss, 'CAT_KITS');
   var filtrados = todos.filter(function(k) {
-    return String(k.bitola || '').trim() === String(params.bitola).trim();
+    if (String(k.ativo).toLowerCase() !== 'true') return false;
+    if (params.bitola !== 'todos' && String(k.bitola || '').trim() !== String(params.bitola).trim()) return false;
+    return true;
   });
   return { status: 'ok', kits: filtrados };
 }
